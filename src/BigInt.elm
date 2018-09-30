@@ -102,8 +102,7 @@ signFromInt x =
 {- From smallest to largest digit, all the digits are positive, no leading zeros -}
 
 
-{-| BigInt type
--}
+{-| -}
 type BigInt
     = Pos Magnitude
     | Neg Magnitude
@@ -172,7 +171,7 @@ fromInt x =
         |> normalise
 
 
-{-| Makes an BigInt from an integer string, positive or negative
+{-| Makes a BigInt from an integer string, positive or negative
 
     fromString "123" == Just (BigInt.Pos ...)
     fromString "-123" == Just (BigInt.Neg ...)
@@ -206,7 +205,6 @@ fromString x =
 
 
 {-| Makes a BigInt from a base16 hex string, positive or negative.
-String can be prepended with or without any combination of "0x", and "+" or "-".
 
     fromHexString "456" == Just (BigInt.Pos ...)
     fromHexString "-123" == Just (BigInt.Neg ...)
@@ -219,6 +217,7 @@ String can be prepended with or without any combination of "0x", and "+" or "-".
     fromHexString "0x" == Nothing
     fromHexString "" == Nothing
 
+**Note:** String can be prepended with or without any combination of "0x", and "+" or "-".
 -}
 fromHexString : String -> Maybe BigInt
 fromHexString x =
