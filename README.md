@@ -10,5 +10,5 @@ are very welcome!
 ## Aknowledgements
 
 - Thank you [Javier Casas](https://github.com/javcasas) whose [elm-integer](https://github.com/javcasas/elm-integer) is the basis for this fork.
-- Thank you [gilbertkennen][https://github.com/gilbertkennen] whose [bigint](https://github.com/gilbertkennen/bigint) is basically the verbatim basis for this repository.
-- Thank you [hickscorp][https://github.com/hickscorp] whose [bigint](https://github.com/hickscorp/bigint) for the further work on top of the original BigInt library.
+- Thank you [gilbertkennen](https://github.com/gilbertkennen) whose [bigint](https://github.com/gilbertkennen/bigint) is basically the verbatim basis for this repository.
+- Thank you [hickscorp](https://github.com/hickscorp) whose [bigint](https://github.com/hickscorp/bigint) for the further work on top of the original BigInt library.
