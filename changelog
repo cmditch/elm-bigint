@@ -1,0 +1,7 @@
+1.0.2
++ Updated to 0.19
++ Mixed case hex strings are now valid.
++ (BigInt.fromString "") no longer equals (BigInt.fromString "0")
++ mod renamed to modBy. Returns Maybe instead of crashing now. `modBy 0 n` == Nothing
++ Fixed bug where `BigInt.fromInt 1234567812345678 |> BigInt.toString` would cause a crash.
++ BigInt.toHexString now prepends "0x" or "-0x". Hex strings should be produced as they are consumed.

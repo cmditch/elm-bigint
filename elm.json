@@ -1,0 +1,20 @@
+{
+    "type": "package",
+    "name": "cmditch/elm-bigint",
+    "summary": "Unlimited size integers",
+    "license": "MIT",
+    "version": "1.0.0",
+    "exposed-modules": [
+        "BigInt"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "elm/core": "1.0.0 <= v < 2.0.0",
+        "elm-community/list-extra": "8.0.0 <= v < 9.0.0",
+        "elm-community/maybe-extra": "5.0.0 <= v < 6.0.0",
+        "rtfeldman/elm-hex": "1.0.0 <= v < 2.0.0"
+    },
+    "test-dependencies": {
+        "elm-explorations/test": "1.1.0 <= v < 2.0.0"
+    }
+}
