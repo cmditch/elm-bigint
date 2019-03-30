@@ -4,3 +4,4 @@ elm-stuff/
 repl-temp-*
 # elm-make Test.elm generated files
 index.html
+.idea

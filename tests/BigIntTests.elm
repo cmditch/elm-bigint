@@ -86,7 +86,7 @@ fromTests =
             \_ ->
                 let
                     fromString =
-                        BigInt.fromString "9999999"
+                        BigInt.fromIntString "9999999"
 
                     fromInt =
                         BigInt.fromInt 9999999
@@ -96,7 +96,7 @@ fromTests =
             \_ ->
                 let
                     fromString =
-                        BigInt.fromString "10000000"
+                        BigInt.fromIntString "10000000"
 
                     fromInt =
                         BigInt.fromInt 10000000
@@ -106,7 +106,7 @@ fromTests =
             \_ ->
                 let
                     fromString =
-                        BigInt.fromString "10000001"
+                        BigInt.fromIntString "10000001"
 
                     fromInt =
                         BigInt.fromInt 10000001
@@ -139,13 +139,13 @@ fromTests =
                 in
                 Expect.equal fromString (Just fromInt)
         , test "fromString 0 = fromInt 0" <|
-            \_ -> Expect.equal (BigInt.fromString "0") (Just <| BigInt.fromInt 0)
+            \_ -> Expect.equal (BigInt.fromIntString "0") (Just <| BigInt.fromInt 0)
         , test "fromString \"\" = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromString "") Nothing
+            \_ -> Expect.equal (BigInt.fromIntString "") Nothing
         , test "fromString + = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromString "+") Nothing
+            \_ -> Expect.equal (BigInt.fromIntString "+") Nothing
         , test "fromString - = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromString "-") Nothing
+            \_ -> Expect.equal (BigInt.fromIntString "-") Nothing
         , test "fromHexString 0x0 = fromInt 0" <|
             \_ -> Expect.equal (BigInt.fromHexString "0x0") (Just <| BigInt.fromInt 0)
         , test "fromHexString -0x0 = fromInt 0" <|
@@ -158,8 +158,10 @@ fromTests =
             \_ -> Expect.equal (BigInt.fromHexString "-") Nothing
         , test "fromHexString 0x = Nothing" <|
             \_ -> Expect.equal (BigInt.fromHexString "0x") Nothing
-        , test "fromHexString -0x = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "-0x") Nothing
+        , test "fromHexString --0x0 = Nothing" <|
+            \_ -> Expect.equal (BigInt.fromHexString "--0x0") Nothing
+        , test "fromIntString --23 = Nothing" <|
+            \_ -> Expect.equal (BigInt.fromIntString "--23") Nothing
         ]
 
 
@@ -170,7 +172,7 @@ roundRobinTests =
             fromInt int_
                 |> toHexString
                 |> fromHexString
-                |> Maybe.andThen (toString >> fromString)
+                |> Maybe.andThen (toString >> fromIntString)
     in
     describe "complex round robin: fromInt -> toHexString -> fromHexString -> toString -> fromString"
         [ fuzz maxIntRange "large int range" <|
@@ -294,7 +296,7 @@ stringTests =
     describe "toString and fromString"
         [ fuzz integer "fromString (toString x) = Just x" <|
             \x ->
-                fromString (BigInt.toString x)
+                fromIntString (BigInt.toString x)
                     |> Expect.equal (Just x)
         , fuzz smallInt "match string formatting from core" <|
             \x ->
@@ -309,8 +311,8 @@ stringTests =
                             |> BigInt.toString
                 in
                 String.cons '+' y
-                    |> fromString
-                    |> Expect.equal (fromString y)
+                    |> fromIntString
+                    |> Expect.equal (fromIntString y)
         , test "Basic toHexString" <|
             \_ ->
                 let

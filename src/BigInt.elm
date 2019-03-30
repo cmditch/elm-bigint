@@ -1,6 +1,6 @@
 module BigInt exposing
     ( BigInt
-    , fromInt, fromString, fromHexString, toString, toHexString
+    , fromInt, fromIntString, fromHexString, toString, toHexString
     , add, sub, mul, div, modBy, divmod, pow
     , abs, negate
     , compare, gt, gte, lt, lte, max, min
@@ -14,7 +14,7 @@ module BigInt exposing
 
 # From/To
 
-@docs fromInt, fromString, fromHexString, toString, toHexString
+@docs fromInt, fromIntString, fromHexString, toString, toHexString
 
 
 # Operations
@@ -44,7 +44,7 @@ import Hex
 import List.Extra
 import Maybe exposing (Maybe)
 import Maybe.Extra
-import String
+import Regex
 
 
 {-| The sign of the bigInt
@@ -173,14 +173,14 @@ fromInt x =
 
 {-| Makes a BigInt from an integer string, positive or negative
 
-    fromString "123" == Just (BigInt.Pos ...)
-    fromString "-123" == Just (BigInt.Neg ...)
-    fromString "" == Nothing
-    fromString "this is not a number :P" == Nothing
+    fromIntString "123" == Just (BigInt.Pos ...)
+    fromIntString "-123" == Just (BigInt.Neg ...)
+    fromIntString "" == Nothing
+    fromIntString "this is not a number :P" == Nothing
 
 -}
-fromString : String -> Maybe BigInt
-fromString x =
+fromIntString : String -> Maybe BigInt
+fromIntString x =
     case String.toList (String.toLower x) of
         [] ->
             Nothing
@@ -206,8 +206,8 @@ fromString x =
 
 {-| Makes a BigInt from a base16 hex string, positive or negative.
 
-    fromHexString "456" == Just (BigInt.Pos ...)
-    fromHexString "-123" == Just (BigInt.Neg ...)
+    fromHexString "4b6" == Just (BigInt.Pos ...)
+    fromHexString "-13d" == Just (BigInt.Neg ...)
 
     fromHexString "0x456" == Just (BigInt.Pos ...)
     fromHexString "-0x123" == Just (BigInt.Neg ...)
@@ -218,6 +218,7 @@ fromString x =
     fromHexString "" == Nothing
 
 **Note:** String can be prepended with or without any combination of "0x", and "+" or "-".
+
 -}
 fromHexString : String -> Maybe BigInt
 fromHexString x =
@@ -260,23 +261,33 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    List.reverse x
-        |> List.Extra.greedyGroupsOf maxDigitMagnitude
-        |> List.map (List.reverse >> String.fromList >> String.toInt)
-        |> Maybe.Extra.combine
-        |> Maybe.map (emptyZero << Magnitude)
+    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9]x`")) <| String.fromList x of
+        True ->
+            List.reverse x
+                |> List.Extra.greedyGroupsOf maxDigitMagnitude
+                |> List.map (List.reverse >> String.fromList >> String.toInt)
+                |> Maybe.Extra.combine
+                |> Maybe.map (emptyZero << Magnitude)
+
+        False ->
+            Nothing
 
 
 fromHexString_ : List Char -> Maybe BigInt
 fromHexString_ x =
-    List.reverse x
-        |> List.Extra.greedyGroupsOf hexDigitMagnitude
-        |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
-        |> Maybe.Extra.combine
-        |> Maybe.map
-            (List.reverse
-                >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
-            )
+    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9A-Fa-f]")) <| String.fromList x of
+        True ->
+            List.reverse x
+                |> List.Extra.greedyGroupsOf hexDigitMagnitude
+                |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
+                |> Maybe.Extra.combine
+                |> Maybe.map
+                    (List.reverse
+                        >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+                    )
+
+        False ->
+            Nothing
 
 
 emptyZero : Magnitude -> Magnitude
