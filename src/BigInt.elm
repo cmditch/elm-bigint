@@ -261,7 +261,7 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9]x`")) <| String.fromList x of
+    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9]")) <| String.fromList x of
         True ->
             List.reverse x
                 |> List.Extra.greedyGroupsOf maxDigitMagnitude
