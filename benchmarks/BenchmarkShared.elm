@@ -15,7 +15,7 @@ bigIntHexString =
 
 bigInt : BI.BigInt
 bigInt =
-    BI.fromString bigIntString
+    BI.fromIntString bigIntString
         |> Maybe.withDefault (BI.fromInt 0)
 
 
