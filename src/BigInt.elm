@@ -632,6 +632,9 @@ div num den =
 
     modBy (BigInt.fromInt 3) (BigInt.fromInt 3)
 
+**Note:** This function returns negative values when
+the second argument is negative, unlike Basics.modBy.
+
 -}
 modBy : BigInt -> BigInt -> Maybe BigInt
 modBy modulus x =
