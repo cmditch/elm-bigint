@@ -261,21 +261,32 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    if Regex.contains fromString_regex <| String.fromList x then
-        List.reverse x
-            |> List.Extra.greedyGroupsOf maxDigitMagnitude
-            |> List.map (List.reverse >> String.fromList >> String.toInt)
-            |> Maybe.Extra.combine
-            |> Maybe.map (emptyZero << Magnitude)
+    x
+        |> Maybe.Extra.traverse
+            (\d ->
+                let
+                    r : Int
+                    r =
+                        Char.toCode d - Char.toCode '0'
+                in
+                if r >= 0 && r <= 9 then
+                    Just r
 
-    else
-        Nothing
-
-
-fromString_regex : Regex
-fromString_regex =
-    Regex.fromString "^[0-9]"
-        |> Maybe.withDefault Regex.never
+                else
+                    Nothing
+            )
+        |> Maybe.map
+            (\digitList ->
+                digitList
+                    |> List.reverse
+                    |> List.Extra.greedyGroupsOf maxDigitMagnitude
+                    |> List.map
+                        (\group ->
+                            List.foldr (\e a -> a * 10 + e) 0 group
+                        )
+                    |> Magnitude
+                    |> emptyZero
+            )
 
 
 fromHexString_ : List Char -> Maybe BigInt
