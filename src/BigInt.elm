@@ -261,16 +261,15 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    case Regex.contains fromString_regex <| String.fromList x of
-        True ->
-            List.reverse x
-                |> List.Extra.greedyGroupsOf maxDigitMagnitude
-                |> List.map (List.reverse >> String.fromList >> String.toInt)
-                |> Maybe.Extra.combine
-                |> Maybe.map (emptyZero << Magnitude)
+    if Regex.contains fromString_regex <| String.fromList x then
+        List.reverse x
+            |> List.Extra.greedyGroupsOf maxDigitMagnitude
+            |> List.map (List.reverse >> String.fromList >> String.toInt)
+            |> Maybe.Extra.combine
+            |> Maybe.map (emptyZero << Magnitude)
 
-        False ->
-            Nothing
+    else
+        Nothing
 
 
 fromString_regex : Regex
@@ -281,19 +280,18 @@ fromString_regex =
 
 fromHexString_ : List Char -> Maybe BigInt
 fromHexString_ x =
-    case Regex.contains fromHexString_regex <| String.fromList x of
-        True ->
-            List.reverse x
-                |> List.Extra.greedyGroupsOf hexDigitMagnitude
-                |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
-                |> Maybe.Extra.combine
-                |> Maybe.map
-                    (List.reverse
-                        >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
-                    )
+    if Regex.contains fromHexString_regex <| String.fromList x then
+        List.reverse x
+            |> List.Extra.greedyGroupsOf hexDigitMagnitude
+            |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
+            |> Maybe.Extra.combine
+            |> Maybe.map
+                (List.reverse
+                    >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+                )
 
-        False ->
-            Nothing
+    else
+        Nothing
 
 
 fromHexString_regex : Regex
