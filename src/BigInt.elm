@@ -44,7 +44,7 @@ import Hex
 import List.Extra
 import Maybe exposing (Maybe)
 import Maybe.Extra
-import Regex
+import Regex exposing (Regex)
 
 
 {-| The sign of the bigInt
@@ -261,7 +261,7 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9]")) <| String.fromList x of
+    case Regex.contains fromString_regex <| String.fromList x of
         True ->
             List.reverse x
                 |> List.Extra.greedyGroupsOf maxDigitMagnitude
@@ -273,9 +273,15 @@ fromString_ x =
             Nothing
 
 
+fromString_regex : Regex
+fromString_regex =
+    Regex.fromString "^[0-9]"
+        |> Maybe.withDefault Regex.never
+
+
 fromHexString_ : List Char -> Maybe BigInt
 fromHexString_ x =
-    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9A-Fa-f]")) <| String.fromList x of
+    case Regex.contains fromHexString_regex <| String.fromList x of
         True ->
             List.reverse x
                 |> List.Extra.greedyGroupsOf hexDigitMagnitude
@@ -288,6 +294,12 @@ fromHexString_ x =
 
         False ->
             Nothing
+
+
+fromHexString_regex : Regex
+fromHexString_regex =
+    Regex.fromString "^[0-9A-Fa-f]"
+        |> Maybe.withDefault Regex.never
 
 
 emptyZero : Magnitude -> Magnitude
