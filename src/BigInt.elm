@@ -44,7 +44,6 @@ import Hex
 import List.Extra
 import Maybe exposing (Maybe)
 import Maybe.Extra
-import Regex exposing (Regex)
 
 
 {-| The sign of the bigInt
@@ -291,24 +290,39 @@ fromString_ x =
 
 fromHexString_ : List Char -> Maybe BigInt
 fromHexString_ x =
-    if Regex.contains fromHexString_regex <| String.fromList x then
-        List.reverse x
-            |> List.Extra.greedyGroupsOf hexDigitMagnitude
-            |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
-            |> Maybe.Extra.combine
-            |> Maybe.map
-                (List.reverse
-                    >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
-                )
+    x
+        |> Maybe.Extra.traverse
+            (\d ->
+                let
+                    r : Int
+                    r =
+                        Char.toCode d - Char.toCode '0'
+                in
+                if r >= 0 && r <= 9 then
+                    Just r
 
-    else
-        Nothing
+                else
+                    let
+                        q =
+                            Char.toCode d - Char.toCode 'a' + 10
+                    in
+                    if q >= 10 && q < 16 then
+                        Just q
 
-
-fromHexString_regex : Regex
-fromHexString_regex =
-    Regex.fromString "^[0-9A-Fa-f]"
-        |> Maybe.withDefault Regex.never
+                    else
+                        Nothing
+            )
+        |> Maybe.map
+            (\digitList ->
+                digitList
+                    |> List.reverse
+                    |> List.Extra.greedyGroupsOf hexDigitMagnitude
+                    |> List.map
+                        (\group ->
+                            List.foldr (\e a -> a * 16 + e) 0 group
+                        )
+                    |> List.foldr (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+            )
 
 
 emptyZero : Magnitude -> Magnitude
