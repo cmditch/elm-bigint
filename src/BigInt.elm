@@ -594,8 +594,12 @@ toHexString bigInt =
             else
                 hexMagnitudeToString (Pos mag)
 
-        Neg _ ->
-            "-" ++ toHexString (mul (fromInt -1) bigInt)
+        Neg mag ->
+            if mag == Magnitude [] then
+                "0"
+
+            else
+                "-" ++ hexMagnitudeToString (Pos mag)
 
 
 
