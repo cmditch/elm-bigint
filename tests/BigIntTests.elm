@@ -3,11 +3,9 @@ module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, from
 import BigInt exposing (..)
 import Constants exposing (maxDigitValue)
 import Expect
-import Fuzz exposing (Fuzzer, int, intRange, tuple)
+import Fuzz exposing (Fuzzer, int, intRange)
 import Hex
-import Maybe exposing (Maybe)
 import Random
-import String
 import Test exposing (..)
 
 
@@ -189,17 +187,17 @@ roundRobinTests =
 addTests : Test
 addTests =
     describe "addition"
-        [ fuzz (tuple ( smallInt, smallInt )) "add x y = x + y for small numbers" <|
-            \( x, y ) ->
+        [ fuzz2 smallInt smallInt "add x y = x + y for small numbers" <|
+            \x y ->
                 add (fromInt x) (fromInt y)
                     |> Expect.equal (fromInt (x + y))
-        , fuzz (tuple ( integer, integer )) "x + y + (-y) = x" <|
-            \( x, y ) ->
+        , fuzz2 integer integer "x + y + (-y) = x" <|
+            \x y ->
                 add x y
                     |> add (BigInt.negate y)
                     |> Expect.equal x
-        , fuzz (tuple ( integer, integer )) "a + b = b + a" <|
-            \( a, b ) -> Expect.equal (add a b) (add b a)
+        , fuzz2 integer integer "a + b = b + a" <|
+            \a b -> Expect.equal (add a b) (add b a)
         ]
 
 
@@ -236,28 +234,28 @@ negateTests =
 subTests : Test
 subTests =
     describe "subtraction"
-        [ fuzz (tuple ( integer, integer )) "x - y = x + -y" <|
-            \( x, y ) ->
+        [ fuzz2 integer integer "x - y = x + -y" <|
+            \x y ->
                 Expect.equal (sub x y) (add x (BigInt.negate y))
-        , fuzz (tuple ( integer, integer )) "a - b = -(b - a)" <|
-            \( a, b ) -> Expect.equal (sub a b) (BigInt.negate (sub b a))
+        , fuzz2 integer integer "a - b = -(b - a)" <|
+            \a b -> Expect.equal (sub a b) (BigInt.negate (sub b a))
         ]
 
 
 mulTests : Test
 mulTests =
     describe "Mul testsuite"
-        [ fuzz (tuple ( smallInt, smallInt )) "mult x y = x * y for small numbers" <|
-            \( x, y ) ->
+        [ fuzz2 smallInt smallInt "mult x y = x * y for small numbers" <|
+            \x y ->
                 mul (fromInt x) (fromInt y)
                     |> Expect.equal (fromInt (x * y))
-        , fuzz (tuple ( integer, nonZeroInteger )) "(x * y) / y = x" <|
-            \( x, y ) ->
+        , fuzz2 integer nonZeroInteger "(x * y) / y = x" <|
+            \x y ->
                 mul x y
                     |> (\n -> divmod n y)
                     |> Expect.equal (Just ( x, zero ))
-        , fuzz (tuple ( integer, integer )) "x * y = y * x" <|
-            \( x, y ) ->
+        , fuzz2 integer integer "x * y = y * x" <|
+            \x y ->
                 Expect.equal (mul x y) (mul y x)
         ]
 
@@ -265,8 +263,8 @@ mulTests =
 divmodTests : Test
 divmodTests =
     describe "divmod"
-        [ fuzz (tuple ( integer, nonZeroInteger )) "definition" <|
-            \( x, y ) ->
+        [ fuzz2 integer nonZeroInteger "definition" <|
+            \x y ->
                 case divmod x y of
                     Nothing ->
                         Expect.equal y (fromInt 0)
@@ -338,8 +336,8 @@ stringTests =
 minTests : Test
 minTests =
     describe "min"
-        [ fuzz (tuple ( integer, integer )) "min x y = x; x <= y and min x y = y; x > y" <|
-            \( x, y ) ->
+        [ fuzz2 integer integer "min x y = x; x <= y and min x y = y; x > y" <|
+            \x y ->
                 case BigInt.compare x y of
                     GT ->
                         Expect.equal (BigInt.min x y) y
@@ -352,8 +350,8 @@ minTests =
 maxTests : Test
 maxTests =
     describe "max"
-        [ fuzz (tuple ( integer, integer )) "min x y = y; x <= y and min x y = x; x > y" <|
-            \( x, y ) ->
+        [ fuzz2 integer integer "min x y = y; x <= y and min x y = x; x > y" <|
+            \x y ->
                 case BigInt.compare x y of
                     LT ->
                         Expect.equal (BigInt.max x y) y
@@ -368,23 +366,29 @@ compareTests =
     describe "compare"
         [ fuzz integer "x = x" <|
             \x ->
-                Expect.true "apparently x /= x" (x == x)
-        , fuzz (tuple ( integer, integer )) "x <= x + y; y >= 0" <|
-            \( x, y ) ->
-                Expect.true "apparently !(x <= x + y); y >= 0"
-                    (lte x (add x (BigInt.abs y)))
-        , fuzz (tuple ( integer, integer )) "x >= x + y; y <= 0" <|
-            \( x, y ) ->
-                Expect.true "apparently !(x >= x + y); y <= 0"
-                    (gte x (add x (BigInt.abs y |> BigInt.negate)))
-        , fuzz (tuple ( integer, nonZeroInteger )) "x < x + y; y > 0" <|
-            \( x, y ) ->
-                Expect.true "apparently !(x < x + y); y > 0"
-                    (lt x (add x (BigInt.abs y)))
-        , fuzz (tuple ( integer, nonZeroInteger )) "x > x + y; y < 0" <|
-            \( x, y ) ->
-                Expect.true "apparently !(x > x + y); y < 0"
-                    (gt x (add x (BigInt.abs y |> BigInt.negate)))
+                x
+                    |> Expect.equal x
+                    |> Expect.onFail "apparently x /= x"
+        , fuzz2 integer integer "x <= x + y; y >= 0" <|
+            \x y ->
+                lte x (add x (BigInt.abs y))
+                    |> Expect.equal True
+                    |> Expect.onFail "apparently !(x <= x + y); y >= 0"
+        , fuzz2 integer integer "x >= x + y; y <= 0" <|
+            \x y ->
+                gte x (add x (BigInt.abs y |> BigInt.negate))
+                    |> Expect.equal True
+                    |> Expect.onFail "apparently !(x >= x + y); y <= 0"
+        , fuzz2 integer nonZeroInteger "x < x + y; y > 0" <|
+            \x y ->
+                lt x (add x (BigInt.abs y))
+                    |> Expect.equal True
+                    |> Expect.onFail "apparently !(x < x + y); y > 0"
+        , fuzz2 integer nonZeroInteger "x > x + y; y < 0" <|
+            \x y ->
+                gt x (add x (BigInt.abs y |> BigInt.negate))
+                    |> Expect.equal True
+                    |> Expect.onFail "apparently !(x > x + y); y < 0"
         ]
 
 
@@ -407,8 +411,8 @@ isOddTests =
 powTests : Test
 powTests =
     describe "exponentiation (pow)"
-        [ fuzz (tuple ( tinyInt, tinyPositiveInt )) "pow x y = y ^ x for small numbers" <|
-            \( base, exp ) ->
+        [ fuzz2 tinyInt tinyPositiveInt "pow x y = y ^ x for small numbers" <|
+            \base exp ->
                 BigInt.toString (pow (fromInt base) (fromInt exp))
                     |> Expect.equal (BigInt.toString (fromInt (base ^ exp)))
         ]
