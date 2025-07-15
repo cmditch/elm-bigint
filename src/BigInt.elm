@@ -608,7 +608,7 @@ toHexString bigInt =
             else
                 hexMagnitudeToString (Pos mag)
 
-        Neg mag ->
+        Neg _ ->
             "-" ++ toHexString (mul (fromInt -1) bigInt)
 
 
