@@ -358,11 +358,10 @@ stringTests =
                     fromBase16String =
                         BigInt.fromHexString "2386f26fc10000"
 
-                    midLargeInt =
-                        BigInt.fromInt 100000000
-
-                    fromInt =
-                        mul midLargeInt midLargeInt
+                    -- midLargeInt =
+                    --     BigInt.fromInt 100000000
+                    -- fromInt =
+                    --     mul midLargeInt midLargeInt
                 in
                 Expect.equal
                     (Maybe.map BigInt.toHexString fromBase16String)
