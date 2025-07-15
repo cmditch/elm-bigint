@@ -459,8 +459,7 @@ compare int1 int2 =
             GT
 
         ( Neg (Magnitude mag1), Neg (Magnitude mag2) ) ->
-            compareMagnitude 0 0 mag1 mag2
-                |> orderNegate
+            compareMagnitude 0 0 mag2 mag1
 
         ( Neg _, _ ) ->
             LT
@@ -493,19 +492,6 @@ compareMagnitude x y xs ys =
 
             else
                 compareMagnitude x_ y_ xss yss
-
-
-orderNegate : Order -> Order
-orderNegate x =
-    case x of
-        LT ->
-            GT
-
-        EQ ->
-            EQ
-
-        GT ->
-            LT
 
 
 {-| Less than
