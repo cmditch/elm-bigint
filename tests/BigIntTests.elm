@@ -376,8 +376,13 @@ gcdTests =
                     g =
                         BigInt.gcd x y
                 in
-                ( BigInt.modBy g x, BigInt.modBy g y )
-                    |> Expect.equal ( Just zero, Just zero )
+                if g == zero then
+                    ( x, y )
+                        |> Expect.equal ( zero, zero )
+
+                else
+                    ( BigInt.modBy g x, BigInt.modBy g y )
+                        |> Expect.equal ( Just zero, Just zero )
         ]
 
 
