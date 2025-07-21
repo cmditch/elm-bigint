@@ -322,7 +322,7 @@ fromHexString_ x =
                         (\group ->
                             List.foldr (\e a -> a * 16 + e) 0 group
                         )
-                    |> List.foldr (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+                    |> List.foldr (\e s -> mul eightHexDigits s |> add (fromInt e)) zero
             )
 
 
@@ -577,8 +577,8 @@ toString bigInt =
 
 
 fillZeroes : Int -> String
-fillZeroes =
-    String.padLeft maxDigitMagnitude '0' << String.fromInt
+fillZeroes x =
+    String.padLeft maxDigitMagnitude '0' (String.fromInt x)
 
 
 revMagnitudeToString : Magnitude -> String
