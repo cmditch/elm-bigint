@@ -752,7 +752,11 @@ modBy den num =
                                     0
                                     numList
                         in
-                        Just (fromInt (m - shortDen))
+                        if m > 0 then
+                            Just (fromInt (m - shortDen))
+
+                        else
+                            Just (fromInt m)
 
             denList ->
                 let
