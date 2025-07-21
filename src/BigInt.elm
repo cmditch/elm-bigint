@@ -183,7 +183,7 @@ fromInt x =
 -}
 fromIntString : String -> Maybe BigInt
 fromIntString x =
-    case String.toList (String.toLower x) of
+    case String.toList x of
         [] ->
             Nothing
 
@@ -224,7 +224,7 @@ fromIntString x =
 -}
 fromHexString : String -> Maybe BigInt
 fromHexString x =
-    case String.toList (String.toLower x) of
+    case String.toList x of
         [] ->
             Nothing
 
@@ -233,14 +233,14 @@ fromHexString x =
 
         '-' :: '0' :: 'x' :: xs ->
             fromHexString_ xs
-                |> Maybe.map (mul (fromInt -1))
+                |> Maybe.map negate
 
         '-' :: [] ->
             Nothing
 
         '-' :: xs ->
             fromHexString_ xs
-                |> Maybe.map (mul (fromInt -1))
+                |> Maybe.map negate
 
         '+' :: [] ->
             Nothing
@@ -269,10 +269,10 @@ fromString_ x =
                 let
                     r : Int
                     r =
-                        Char.toCode d - Char.toCode '0'
+                        Char.toCode d
                 in
-                if r >= 0 && r <= 9 then
-                    Just r
+                if r >= 0x30 && r <= 0x39 then
+                    Just (r - 0x30)
 
                 else
                     Nothing
@@ -299,22 +299,19 @@ fromHexString_ x =
                 let
                     r : Int
                     r =
-                        Char.toCode d - Char.toCode '0'
+                        Char.toCode d
                 in
-                if r >= 0 && r <= 9 then
-                    Just r
+                if r >= 0x30 && r <= 0x39 then
+                    Just (r - 0x30)
+
+                else if r >= 0x41 && r <= 0x46 then
+                    Just (r - 0x41 + 0x0A)
+
+                else if r >= 0x61 && r <= 0x66 then
+                    Just (r - 0x61 + 0x0A)
 
                 else
-                    let
-                        q : Int
-                        q =
-                            Char.toCode d - Char.toCode 'a' + 10
-                    in
-                    if q >= 10 && q < 16 then
-                        Just q
-
-                    else
-                        Nothing
+                    Nothing
             )
         |> Maybe.map
             (\digitList ->
