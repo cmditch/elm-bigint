@@ -1,7 +1,7 @@
 module BigInt exposing
     ( BigInt
     , fromInt, fromIntString, fromHexString, toString, toHexString
-    , add, sub, mul, div, modBy, divmod, pow
+    , add, sub, mul, div, modBy, divmod, pow, gcd
     , abs, negate
     , compare, gt, gte, lt, lte, max, min
     , isEven, isOdd
@@ -19,7 +19,7 @@ module BigInt exposing
 
 # Operations
 
-@docs add, sub, mul, div, modBy, divmod, pow
+@docs add, sub, mul, div, modBy, divmod, pow, gcd
 
 
 # Sign
@@ -1100,3 +1100,49 @@ sameSizeRaw xs ys =
 
         ( x :: xs_, y :: ys_ ) ->
             ( x, y ) :: sameSizeRaw xs_ ys_
+
+
+gcd : BigInt -> BigInt -> BigInt
+gcd x y =
+    let
+        -- l > 0, r > 0
+        go : BigInt -> BigInt -> BigInt
+        go l r =
+            case compare l r of
+                EQ ->
+                    l
+
+                LT ->
+                    innerLoop r l
+
+                GT ->
+                    innerLoop l r
+
+        -- l > r >= 0
+        innerLoop : BigInt -> BigInt -> BigInt
+        innerLoop l r =
+            case modBy r l of
+                Nothing ->
+                    l
+
+                Just rem ->
+                    innerLoop r rem
+    in
+    case ( x, y ) of
+        ( Zer, _ ) ->
+            y
+
+        ( _, Zer ) ->
+            x
+
+        ( Neg nx, Neg ny ) ->
+            go (Pos nx) (Pos ny)
+
+        ( Neg nx, Pos py ) ->
+            go (Pos nx) (Pos py)
+
+        ( Pos px, Neg ny ) ->
+            go (Pos px) (Pos ny)
+
+        ( Pos px, Pos py ) ->
+            go (Pos px) (Pos py)
