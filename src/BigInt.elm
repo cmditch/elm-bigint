@@ -292,12 +292,12 @@ fromHexString_ x =
 
 emptyZero : Magnitude -> Magnitude
 emptyZero (Magnitude xs) =
-    case List.Extra.dropWhile ((==) 0) xs of
+    case List.Extra.dropWhileRight ((==) 0) xs of
         [] ->
             Magnitude []
 
-        _ ->
-            Magnitude xs
+        d ->
+            Magnitude d
 
 
 {-| Adds two BigInts
