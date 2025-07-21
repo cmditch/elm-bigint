@@ -140,11 +140,6 @@ type MagnitudeNotNormalised
     = MagnitudeNotNormalised (List Int)
 
 
-mkBigIntNotNormalised : Sign -> List Int -> BigIntNotNormalised
-mkBigIntNotNormalised s digits =
-    BigIntNotNormalised s (MagnitudeNotNormalised digits)
-
-
 toDigits : BigInt -> List Int
 toDigits bigInt =
     case bigInt of
@@ -341,11 +336,25 @@ emptyZero (Magnitude xs) =
 add : BigInt -> BigInt -> BigInt
 add a b =
     let
-        (BigIntNotNormalised _ (MagnitudeNotNormalised ma)) =
-            toPositiveSign a
+        magnitudeMaybeNegated : BigInt -> List Int
+        magnitudeMaybeNegated bigInt =
+            case bigInt of
+                Zer ->
+                    []
 
-        (BigIntNotNormalised _ (MagnitudeNotNormalised mb)) =
-            toPositiveSign b
+                Neg (Magnitude digits) ->
+                    List.map Basics.negate digits
+
+                Pos (Magnitude digits) ->
+                    digits
+
+        ma : List Int
+        ma =
+            magnitudeMaybeNegated a
+
+        mb : List Int
+        mb =
+            magnitudeMaybeNegated b
 
         added : List Int
         added =
@@ -1065,7 +1074,11 @@ normalise (BigIntNotNormalised s digits) =
             normaliseMagnitude digits
     in
     if isNegativeMagnitude normalisedMag then
-        normalise (mkBigIntNotNormalised (signNegate s) (reverseMagnitude normalisedMag))
+        let
+            (Magnitude normalisedMag2) =
+                normaliseMagnitude (MagnitudeNotNormalised (List.map Basics.negate normalisedMag))
+        in
+        mkBigInt (signNegate s) (Magnitude normalisedMag2)
 
     else
         mkBigInt s (Magnitude normalisedMag)
@@ -1105,21 +1118,8 @@ normaliseDigit x =
 
 
 dropZeroes : List Int -> List Int
-dropZeroes =
-    List.Extra.dropWhileRight ((==) 0)
-
-
-toPositiveSign : BigInt -> BigIntNotNormalised
-toPositiveSign bigInt =
-    case bigInt of
-        Zer ->
-            mkBigIntNotNormalised Zero []
-
-        Neg (Magnitude digits) ->
-            mkBigIntNotNormalised Positive (reverseMagnitude digits)
-
-        Pos (Magnitude digits) ->
-            mkBigIntNotNormalised Positive digits
+dropZeroes ls =
+    List.Extra.dropWhileRight ((==) 0) ls
 
 
 isNegativeMagnitude : List Int -> Bool
@@ -1130,11 +1130,6 @@ isNegativeMagnitude digits =
 
         Just x ->
             x < 0
-
-
-reverseMagnitude : List Int -> List Int
-reverseMagnitude =
-    List.map Basics.negate
 
 
 {-| Compute the Greatest Common Divisors of two numbers.
