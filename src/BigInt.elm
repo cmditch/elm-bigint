@@ -344,20 +344,35 @@ emptyZero (Magnitude xs) =
 add : BigInt -> BigInt -> BigInt
 add a b =
     let
-        (BigIntNotNormalised _ ma) =
+        (BigIntNotNormalised _ (MagnitudeNotNormalised ma)) =
             toPositiveSign a
 
-        (BigIntNotNormalised _ mb) =
+        (BigIntNotNormalised _ (MagnitudeNotNormalised mb)) =
             toPositiveSign b
-
-        (MagnitudePair pairs) =
-            sameSizeNotNormalized ma mb
 
         added : List Int
         added =
-            List.map (\( a_, b_ ) -> a_ + b_) pairs
+            sumLonger ma mb
     in
     normalise <| BigIntNotNormalised Positive (MagnitudeNotNormalised added)
+
+
+{-| Sums two lists, padding the shorter with zeroes at the end.
+-}
+sumLonger : List Int -> List Int -> List Int
+sumLonger xs ys =
+    case ( xs, ys ) of
+        ( [], [] ) ->
+            []
+
+        ( _, [] ) ->
+            xs
+
+        ( [], _ ) ->
+            ys
+
+        ( x :: xs_, y :: ys_ ) ->
+            x + y :: sumLonger xs_ ys_
 
 
 {-| Changes the sign of an BigInt
@@ -1097,33 +1112,6 @@ isNegativeMagnitude digits =
 reverseMagnitude : List Int -> List Int
 reverseMagnitude =
     List.map Basics.negate
-
-
-{-| Magnitudes can be different sizes. This represents a pair of magnitudes with everything aligned.
--}
-type MagnitudePair
-    = MagnitudePair (List ( Int, Int ))
-
-
-sameSizeNotNormalized : MagnitudeNotNormalised -> MagnitudeNotNormalised -> MagnitudePair
-sameSizeNotNormalized (MagnitudeNotNormalised xs) (MagnitudeNotNormalised ys) =
-    MagnitudePair <| sameSizeRaw xs ys
-
-
-sameSizeRaw : List Int -> List Int -> List ( Int, Int )
-sameSizeRaw xs ys =
-    case ( xs, ys ) of
-        ( [], [] ) ->
-            []
-
-        ( x :: xs_, [] ) ->
-            ( x, 0 ) :: sameSizeRaw xs_ []
-
-        ( [], y :: ys_ ) ->
-            ( 0, y ) :: sameSizeRaw [] ys_
-
-        ( x :: xs_, y :: ys_ ) ->
-            ( x, y ) :: sameSizeRaw xs_ ys_
 
 
 {-| Compute the Greatest Common Divisors of two numbers.
