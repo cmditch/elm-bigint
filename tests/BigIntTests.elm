@@ -333,10 +333,9 @@ modTests =
                             c : BigInt
                             c =
                                 BigInt.div x y
-                                    |> Debug.log "c"
                         in
                         mul c y
-                            |> add (Debug.log "r" r)
+                            |> add r
                             |> Expect.equal x
         , fuzz2 integer nonZeroInteger "definition" <|
             \x y ->
