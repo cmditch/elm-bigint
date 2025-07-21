@@ -140,7 +140,7 @@ fromTests =
                     fromInt =
                         BigInt.fromInt 9999999
                 in
-                Expect.equal fromString (Just fromInt)
+                fromString |> Expect.equal (Just fromInt)
         , test "fromString 10000000 = fromInt 10000000" <|
             \_ ->
                 let
@@ -152,7 +152,7 @@ fromTests =
                     fromInt =
                         BigInt.fromInt 10000000
                 in
-                Expect.equal fromString (Just fromInt)
+                fromString |> Expect.equal (Just fromInt)
         , test "fromString 10000001 = fromInt 10000001" <|
             \_ ->
                 let
@@ -164,7 +164,7 @@ fromTests =
                     fromInt =
                         BigInt.fromInt 10000001
                 in
-                Expect.equal fromString (Just fromInt)
+                fromString |> Expect.equal (Just fromInt)
         , test "fromHexString 0x2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
@@ -180,7 +180,7 @@ fromTests =
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
-                Expect.equal fromString (Just fromInt)
+                fromString |> Expect.equal (Just fromInt)
         , test "fromHexString 2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
@@ -196,31 +196,36 @@ fromTests =
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
-                Expect.equal fromString (Just fromInt)
+                fromString |> Expect.equal (Just fromInt)
         , test "fromString 0 = fromInt 0" <|
-            \_ -> Expect.equal (BigInt.fromIntString "0") (Just <| BigInt.fromInt 0)
+            \_ -> BigInt.fromIntString "0" |> Expect.equal (Just <| BigInt.fromInt 0)
         , test "fromString \"\" = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromIntString "") Nothing
+            \_ ->
+                BigInt.fromIntString "" |> Expect.equal Nothing
         , test "fromString + = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromIntString "+") Nothing
+            \_ ->
+                BigInt.fromIntString "+" |> Expect.equal Nothing
         , test "fromString - = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromIntString "-") Nothing
+            \_ ->
+                BigInt.fromIntString "-" |> Expect.equal Nothing
         , test "fromHexString 0x0 = fromInt 0" <|
-            \_ -> Expect.equal (BigInt.fromHexString "0x0") (Just <| BigInt.fromInt 0)
+            \_ -> BigInt.fromHexString "0x0" |> Expect.equal (Just <| BigInt.fromInt 0)
         , test "fromHexString -0x0 = fromInt 0" <|
-            \_ -> Expect.equal (BigInt.fromHexString "-0x0") (Just <| BigInt.fromInt 0)
+            \_ -> BigInt.fromHexString "-0x0" |> Expect.equal (Just <| BigInt.fromInt 0)
         , test "fromHexString \"\" = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "") Nothing
+            \_ -> BigInt.fromHexString "" |> Expect.equal Nothing
         , test "fromHexString + = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "+") Nothing
+            \_ -> BigInt.fromHexString "+" |> Expect.equal Nothing
         , test "fromHexString - = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "-") Nothing
+            \_ -> BigInt.fromHexString "-" |> Expect.equal Nothing
         , test "fromHexString 0x = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "0x") Nothing
+            \_ -> BigInt.fromHexString "0x" |> Expect.equal Nothing
         , test "fromHexString --0x0 = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromHexString "--0x0") Nothing
+            \_ -> BigInt.fromHexString "--0x0" |> Expect.equal Nothing
         , test "fromIntString --23 = Nothing" <|
-            \_ -> Expect.equal (BigInt.fromIntString "--23") Nothing
+            \_ -> BigInt.fromIntString "--23" |> Expect.equal Nothing
+        , test "fromHexString \"0xBAD\" = fromInt 0x0BAD" <|
+            \_ -> BigInt.fromHexString "0xBAD" |> Expect.equal (Just <| BigInt.fromInt 0x0BAD)
         ]
 
 
@@ -259,7 +264,9 @@ addTests =
                     |> add (BigInt.negate y)
                     |> Expect.equal x
         , fuzz2 integer integer "a + b = b + a" <|
-            \a b -> Expect.equal (add a b) (add b a)
+            \a b ->
+                add a b
+                    |> Expect.equal (add b a)
         ]
 
 
@@ -300,9 +307,12 @@ subTests =
     describe "subtraction"
         [ fuzz2 integer integer "x - y = x + -y" <|
             \x y ->
-                Expect.equal (sub x y) (add x (BigInt.negate y))
+                sub x y
+                    |> Expect.equal (add x (BigInt.negate y))
         , fuzz2 integer integer "a - b = -(b - a)" <|
-            \a b -> Expect.equal (sub a b) (BigInt.negate (sub b a))
+            \a b ->
+                sub a b
+                    |> Expect.equal (BigInt.negate (sub b a))
         ]
 
 
@@ -320,7 +330,8 @@ mulTests =
                     |> Expect.equal (Just ( x, zero ))
         , fuzz2 integer integer "x * y = y * x" <|
             \x y ->
-                Expect.equal (mul x y) (mul y x)
+                mul x y
+                    |> Expect.equal (mul y x)
         ]
 
 
@@ -331,7 +342,8 @@ divmodTests =
             \x y ->
                 case divmod x y of
                     Nothing ->
-                        Expect.equal y (fromInt 0)
+                        y
+                            |> Expect.equal (fromInt 0)
 
                     Just ( c, r ) ->
                         mul c y
@@ -404,10 +416,12 @@ absTests =
         [ fuzz integer "|x| = x; x >= 0 and |x| = -x; x < 0" <|
             \x ->
                 if gte x zero then
-                    Expect.equal (BigInt.abs x) x
+                    BigInt.abs x
+                        |> Expect.equal x
 
                 else
-                    Expect.equal (BigInt.abs x) (BigInt.negate x)
+                    BigInt.abs x
+                        |> Expect.equal (BigInt.negate x)
         ]
 
 
@@ -446,9 +460,8 @@ stringTests =
                     -- fromInt =
                     --     mul midLargeInt midLargeInt
                 in
-                Expect.equal
-                    (Maybe.map BigInt.toHexString fromBase16String)
-                    (Just "2386f26fc10000")
+                Maybe.map BigInt.toHexString fromBase16String
+                    |> Expect.equal (Just "2386f26fc10000")
         , fuzz smallPositiveIntegers "Same results as rtfeldman/elm-hex" <|
             \x ->
                 BigInt.toHexString (fromInt x)
@@ -463,10 +476,12 @@ minTests =
             \x y ->
                 case BigInt.compare x y of
                     GT ->
-                        Expect.equal (BigInt.min x y) y
+                        BigInt.min x y
+                            |> Expect.equal y
 
                     _ ->
-                        Expect.equal (BigInt.min x y) x
+                        BigInt.min x y
+                            |> Expect.equal x
         ]
 
 
@@ -477,10 +492,12 @@ maxTests =
             \x y ->
                 case BigInt.compare x y of
                     LT ->
-                        Expect.equal (BigInt.max x y) y
+                        BigInt.max x y
+                            |> Expect.equal y
 
                     _ ->
-                        Expect.equal (BigInt.max x y) x
+                        BigInt.max x y
+                            |> Expect.equal x
         ]
 
 
