@@ -157,6 +157,8 @@ toDigits bigInt =
             ds
 
 
+{-| The base we're using for BigInt, 10^7
+-}
 baseDigit : Int
 baseDigit =
     maxDigitValue + 1
