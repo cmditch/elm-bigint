@@ -44,7 +44,6 @@ import Hex
 import List.Extra
 import Maybe exposing (Maybe)
 import Maybe.Extra
-import Regex
 
 
 {-| The sign of the bigInt
@@ -261,33 +260,69 @@ Turn those into integers and store as a Magnitude.
 -}
 fromString_ : List Char -> Maybe Magnitude
 fromString_ x =
-    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9]")) <| String.fromList x of
-        True ->
-            List.reverse x
-                |> List.Extra.greedyGroupsOf maxDigitMagnitude
-                |> List.map (List.reverse >> String.fromList >> String.toInt)
-                |> Maybe.Extra.combine
-                |> Maybe.map (emptyZero << Magnitude)
+    x
+        |> Maybe.Extra.traverse
+            (\d ->
+                let
+                    r : Int
+                    r =
+                        Char.toCode d - Char.toCode '0'
+                in
+                if r >= 0 && r <= 9 then
+                    Just r
 
-        False ->
-            Nothing
+                else
+                    Nothing
+            )
+        |> Maybe.map
+            (\digitList ->
+                digitList
+                    |> List.reverse
+                    |> List.Extra.greedyGroupsOf maxDigitMagnitude
+                    |> List.map
+                        (\group ->
+                            List.foldr (\e a -> a * 10 + e) 0 group
+                        )
+                    |> Magnitude
+                    |> emptyZero
+            )
 
 
 fromHexString_ : List Char -> Maybe BigInt
 fromHexString_ x =
-    case Regex.contains (Maybe.withDefault Regex.never (Regex.fromString "^[0-9A-Fa-f]")) <| String.fromList x of
-        True ->
-            List.reverse x
-                |> List.Extra.greedyGroupsOf hexDigitMagnitude
-                |> List.map (List.reverse >> String.fromList >> Hex.fromString >> Result.toMaybe)
-                |> Maybe.Extra.combine
-                |> Maybe.map
-                    (List.reverse
-                        >> List.foldl (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
-                    )
+    x
+        |> Maybe.Extra.traverse
+            (\d ->
+                let
+                    r : Int
+                    r =
+                        Char.toCode d - Char.toCode '0'
+                in
+                if r >= 0 && r <= 9 then
+                    Just r
 
-        False ->
-            Nothing
+                else
+                    let
+                        q =
+                            Char.toCode d - Char.toCode 'a' + 10
+                    in
+                    if q >= 10 && q < 16 then
+                        Just q
+
+                    else
+                        Nothing
+            )
+        |> Maybe.map
+            (\digitList ->
+                digitList
+                    |> List.reverse
+                    |> List.Extra.greedyGroupsOf hexDigitMagnitude
+                    |> List.map
+                        (\group ->
+                            List.foldr (\e a -> a * 16 + e) 0 group
+                        )
+                    |> List.foldr (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+            )
 
 
 emptyZero : Magnitude -> Magnitude
