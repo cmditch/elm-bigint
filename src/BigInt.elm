@@ -728,18 +728,45 @@ modBy den num =
         Nothing
 
     else
-        let
-            cand_l =
-                List.length (toDigits num) - List.length (toDigits den) + 1
+        case toDigits den of
+            [ shortDen ] ->
+                case num of
+                    Zer ->
+                        Just zero
 
-            m =
-                mod_
-                    (Basics.max 0 cand_l)
-                    (abs num)
-                    (abs den)
-        in
-        Just
-            (mkBigInt (sign num) (magnitude m))
+                    Pos (Magnitude numList) ->
+                        let
+                            m =
+                                List.foldr
+                                    (\d acc -> Basics.modBy shortDen (acc * baseDigit + d))
+                                    0
+                                    numList
+                        in
+                        Just (fromInt m)
+
+                    Neg (Magnitude numList) ->
+                        let
+                            m =
+                                List.foldr
+                                    (\d acc -> Basics.modBy shortDen (acc * baseDigit - d))
+                                    0
+                                    numList
+                        in
+                        Just (fromInt (m - shortDen))
+
+            denList ->
+                let
+                    cand_l =
+                        List.length (toDigits num) - List.length denList + 1
+
+                    m =
+                        mod_
+                            (Basics.max 0 cand_l)
+                            (abs num)
+                            (abs den)
+                in
+                Just
+                    (mkBigInt (sign num) (magnitude m))
 
 
 mod_ : Int -> BigInt -> BigInt -> BigInt
