@@ -1055,11 +1055,6 @@ one =
     fromInt 1
 
 
-two : BigInt
-two =
-    fromInt 2
-
-
 {-| We can perform operations more quickly if we don't worry about keeping things in final compressed form.
 This takes a messed up number and cleans it up.
 -}
