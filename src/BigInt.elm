@@ -183,7 +183,7 @@ fromInt x =
 -}
 fromIntString : String -> Maybe BigInt
 fromIntString x =
-    case String.toList (String.toLower x) of
+    case String.toList x of
         [] ->
             Nothing
 
