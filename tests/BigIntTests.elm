@@ -1,4 +1,4 @@
-module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, integer, isEvenTests, isOddTests, maxTests, minTests, minusOne, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
+module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
 
 import BigInt exposing (..)
 import Constants exposing (maxDigitValue)
@@ -11,7 +11,20 @@ import Test exposing (..)
 
 integer : Fuzzer BigInt
 integer =
-    Fuzz.map fromInt int
+    Fuzz.oneOf
+        [ Fuzz.map fromInt int
+        , Fuzz.filterMap BigInt.fromIntString intString
+        ]
+
+
+intString : Fuzzer String
+intString =
+    let
+        digit : Fuzzer Char
+        digit =
+            Fuzz.oneOfValues [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
+    in
+    Fuzz.map String.fromList (Fuzz.listOfLengthBetween 1 64 digit)
 
 
 maxIntRange : Fuzzer Int
@@ -75,6 +88,34 @@ tinyInt =
 tinyPositiveInt : Fuzzer Int
 tinyPositiveInt =
     intRange 0 11
+
+
+leadingZeroesTest : Test
+leadingZeroesTest =
+    fuzz intString "Correctly discards leading zeroes" <|
+        \str ->
+            let
+                cut : String -> String
+                cut s =
+                    if s == "0" then
+                        s
+
+                    else if String.startsWith "0" s then
+                        cut (String.dropLeft 1 s)
+
+                    else
+                        s
+            in
+            case ( BigInt.fromIntString str, BigInt.fromIntString (cut str) ) of
+                ( Nothing, _ ) ->
+                    Expect.fail ("Failed to parse " ++ str)
+
+                ( _, Nothing ) ->
+                    Expect.fail ("Failed to parse " ++ cut str)
+
+                ( Just fromUncut, Just fromCut ) ->
+                    fromUncut
+                        |> Expect.equal fromCut
 
 
 fromTests : Test
