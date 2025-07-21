@@ -1,12 +1,12 @@
 module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, modTests, mulTests, negateTests, powTests, roundRobinTests, stringTests, subTests)
 
-import BigInt exposing (..)
+import BigInt exposing (BigInt, add, divmod, fromHexString, fromInt, fromIntString, gt, gte, isEven, isOdd, lt, lte, mul, pow, sub, toHexString)
 import Constants exposing (maxDigitValue)
 import Expect
 import Fuzz exposing (Fuzzer, int, intRange)
 import Hex
 import Random
-import Test exposing (..)
+import Test exposing (Test, describe, fuzz, fuzz2, test)
 
 
 integer : Fuzzer BigInt
@@ -220,7 +220,7 @@ roundRobinTests =
             fromInt int_
                 |> toHexString
                 |> fromHexString
-                |> Maybe.andThen (toString >> fromIntString)
+                |> Maybe.andThen (BigInt.toString >> fromIntString)
     in
     describe "complex round robin: fromInt -> toHexString -> fromHexString -> toString -> fromString"
         [ fuzz maxIntRange "large int range" <|
