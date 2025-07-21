@@ -445,20 +445,18 @@ mulMagnitudes (Magnitude mag1) (Magnitude mag2) =
 
         m :: mx ->
             let
-                accum : Magnitude
+                accum : List Int
                 accum =
-                    mulSingleDigit (Magnitude mag2) m
+                    List.map (\d -> d * m) mag2
 
                 (Magnitude rest) =
                     mulMagnitudes (Magnitude mx) (Magnitude mag2)
 
-                bigInt : BigInt
-                bigInt =
-                    add
-                        (mkBigInt Positive accum)
-                        (mkBigInt Positive (Magnitude (0 :: rest)))
+                added : List Int
+                added =
+                    sumLonger accum (0 :: rest)
             in
-            magnitude bigInt
+            normaliseMagnitude (MagnitudeNotNormalised added)
 
 
 mulSingleDigit : Magnitude -> Int -> Magnitude
