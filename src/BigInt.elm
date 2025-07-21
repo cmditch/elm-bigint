@@ -322,7 +322,7 @@ fromHexString_ x =
                         (\group ->
                             List.foldr (\e a -> a * 16 + e) 0 group
                         )
-                    |> List.foldr (\e s -> mul s eightHexDigits |> add (fromInt e)) zero
+                    |> List.foldr (\e s -> mul eightHexDigits s |> add (fromInt e)) zero
             )
 
 
