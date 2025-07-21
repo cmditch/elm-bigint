@@ -157,6 +157,8 @@ toDigits bigInt =
             ds
 
 
+{-| The base we're using for BigInt, 10^7
+-}
 baseDigit : Int
 baseDigit =
     maxDigitValue + 1
@@ -648,9 +650,68 @@ hexMagnitudeToString bigInt =
 -}
 div : BigInt -> BigInt -> BigInt
 div num den =
-    divmod num den
-        |> Maybe.map Tuple.first
-        |> Maybe.withDefault zero
+    if den == zero then
+        zero
+
+    else
+        let
+            cand_l =
+                List.length (toDigits num) - List.length (toDigits den) + 1
+
+            d =
+                div_
+                    (Basics.max 0 cand_l)
+                    (abs num)
+                    (abs den)
+        in
+        mkBigInt (signProduct (sign num) (sign den)) (magnitude d)
+
+
+div_ : Int -> BigInt -> BigInt -> BigInt
+div_ n num den =
+    if n == 0 then
+        divDigit (padDigits n) num den
+
+    else
+        let
+            ( cdiv, cmod ) =
+                divmodDigit (padDigits n) num den
+
+            rdiv =
+                div_ (n - 1) cmod den
+        in
+        add cdiv rdiv
+
+
+divDigit : BigInt -> BigInt -> BigInt -> BigInt
+divDigit padding x y =
+    divDigit_ (2 ^ maxDigitBits) padding x y
+
+
+divDigit_ : Int -> BigInt -> BigInt -> BigInt -> BigInt
+divDigit_ to_test padding num den =
+    if to_test == 0 then
+        zero
+
+    else
+        let
+            x =
+                fromInt to_test
+
+            candidate =
+                mul (mul x den) padding
+
+            ( newdiv, newmod ) =
+                if lte candidate num then
+                    ( mul x padding, sub num candidate )
+
+                else
+                    ( zero, num )
+
+            restdiv =
+                divDigit_ (to_test // 2) padding newmod den
+        in
+        add newdiv restdiv
 
 
 {-| Modulus.
@@ -662,8 +723,91 @@ the second argument is negative, unlike Basics.modBy.
 
 -}
 modBy : BigInt -> BigInt -> Maybe BigInt
-modBy modulus x =
-    divmod x modulus |> Maybe.map Tuple.second
+modBy den num =
+    if den == zero then
+        Nothing
+
+    else
+        case toDigits den of
+            [ shortDen ] ->
+                case num of
+                    Zer ->
+                        Just zero
+
+                    Pos (Magnitude numList) ->
+                        let
+                            m =
+                                List.foldr
+                                    (\d acc -> Basics.modBy shortDen (acc * baseDigit + d))
+                                    0
+                                    numList
+                        in
+                        Just (fromInt m)
+
+                    Neg (Magnitude numList) ->
+                        let
+                            m =
+                                List.foldr
+                                    (\d acc -> Basics.modBy shortDen (acc * baseDigit - d))
+                                    0
+                                    numList
+                        in
+                        Just (fromInt (m - shortDen))
+
+            denList ->
+                let
+                    cand_l =
+                        List.length (toDigits num) - List.length denList + 1
+
+                    m =
+                        mod_
+                            (Basics.max 0 cand_l)
+                            (abs num)
+                            (abs den)
+                in
+                Just
+                    (mkBigInt (sign num) (magnitude m))
+
+
+mod_ : Int -> BigInt -> BigInt -> BigInt
+mod_ n num den =
+    if n == 0 then
+        modDigit (padDigits n) num den
+
+    else
+        let
+            cmod =
+                modDigit (padDigits n) num den
+        in
+        mod_ (n - 1) cmod den
+
+
+modDigit : BigInt -> BigInt -> BigInt -> BigInt
+modDigit padding x y =
+    modDigit_ (2 ^ maxDigitBits) padding x y
+
+
+modDigit_ : Int -> BigInt -> BigInt -> BigInt -> BigInt
+modDigit_ to_test padding num den =
+    if to_test == 0 then
+        num
+
+    else
+        let
+            x =
+                fromInt to_test
+
+            candidate =
+                mul (mul x den) padding
+
+            newMod =
+                if lte candidate num then
+                    sub num candidate
+
+                else
+                    num
+        in
+        modDigit_ (to_test // 2) padding newMod den
 
 
 {-| Square.
