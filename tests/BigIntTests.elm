@@ -1,4 +1,4 @@
-module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
+module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, modTests, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
 
 import BigInt exposing (..)
 import Constants exposing (maxDigitValue)
@@ -311,6 +311,28 @@ divmodTests =
                         Expect.equal y (fromInt 0)
 
                     Just ( c, r ) ->
+                        mul c y
+                            |> add r
+                            |> Expect.equal x
+        ]
+
+
+modTests : Test
+modTests =
+    describe "modBy"
+        [ fuzz2 integer nonZeroInteger "definition" <|
+            \x y ->
+                case BigInt.modBy y x of
+                    Nothing ->
+                        y
+                            |> Expect.equal (fromInt 0)
+
+                    Just r ->
+                        let
+                            c : BigInt
+                            c =
+                                BigInt.div x y
+                        in
                         mul c y
                             |> add r
                             |> Expect.equal x
