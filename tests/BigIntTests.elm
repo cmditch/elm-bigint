@@ -282,7 +282,7 @@ subTests =
 mulTests : Test
 mulTests =
     describe "Mul testsuite"
-        [ fuzz2 smallInt smallInt "mult x y = x * y for small numbers" <|
+        [ fuzz2 smallInt smallInt "mul x y = x * y for small numbers" <|
             \x y ->
                 mul (fromInt x) (fromInt y)
                     |> Expect.equal (fromInt (x * y))
