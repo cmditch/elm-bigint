@@ -1,4 +1,4 @@
-module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, modTests, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
+module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, modTests, mulTests, negateTests, powTests, roundRobinTests, stringTests, subTests)
 
 import BigInt exposing (..)
 import Constants exposing (maxDigitValue)
@@ -69,11 +69,6 @@ zero =
 one : BigInt
 one =
     fromInt 1
-
-
-minusOne : BigInt
-minusOne =
-    fromInt -1
 
 
 smallInt : Fuzzer Int
