@@ -120,9 +120,11 @@ fromTests =
         [ test "fromString 9999999 = fromInt 9999999" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "9999999"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 9999999
                 in
@@ -130,9 +132,11 @@ fromTests =
         , test "fromString 10000000 = fromInt 10000000" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "10000000"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 10000000
                 in
@@ -140,9 +144,11 @@ fromTests =
         , test "fromString 10000001 = fromInt 10000001" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "10000001"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 10000001
                 in
@@ -150,12 +156,15 @@ fromTests =
         , test "fromHexString 0x2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromHexString "0x2386f26fc10000"
 
+                    midLargeInt : BigInt
                     midLargeInt =
                         BigInt.fromInt 100000000
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
@@ -163,12 +172,15 @@ fromTests =
         , test "fromHexString 2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromHexString "2386f26fc10000"
 
+                    midLargeInt : BigInt
                     midLargeInt =
                         BigInt.fromInt 100000000
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
@@ -203,6 +215,7 @@ fromTests =
 roundRobinTests : Test
 roundRobinTests =
     let
+        complexRoundRobin : Int -> Maybe BigInt
         complexRoundRobin int_ =
             fromInt int_
                 |> toHexString
@@ -244,6 +257,7 @@ negateTests =
         [ fuzz int "negate x = -x; x >= 0" <|
             \x ->
                 let
+                    y : Int
                     y =
                         Basics.abs x
                 in
@@ -253,6 +267,7 @@ negateTests =
         , fuzz int "negate (-x) = x; x >= 0" <|
             \x ->
                 let
+                    y : Int
                     y =
                         Basics.abs x * -1
                 in
@@ -357,6 +372,7 @@ gcdTests =
         [ fuzz2 integer integer "definition" <|
             \x y ->
                 let
+                    g : BigInt
                     g =
                         BigInt.gcd x y
                 in
@@ -392,6 +408,7 @@ stringTests =
         , fuzz integer "accept '+' at the beginning of the string" <|
             \x ->
                 let
+                    y : String
                     y =
                         x
                             |> BigInt.abs
@@ -403,6 +420,7 @@ stringTests =
         , test "Basic toHexString" <|
             \_ ->
                 let
+                    fromBase16String : Maybe BigInt
                     fromBase16String =
                         BigInt.fromHexString "2386f26fc10000"
 

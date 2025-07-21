@@ -101,7 +101,8 @@ signFromInt x =
 {- From smallest to largest digit, all the digits are positive, no leading zeros -}
 
 
-{-| -}
+{-| A number with arbitrary size.
+-}
 type BigInt
     = Pos Magnitude
     | Neg Magnitude
@@ -305,6 +306,7 @@ fromHexString_ x =
 
                 else
                     let
+                        q : Int
                         q =
                             Char.toCode d - Char.toCode 'a' + 10
                     in
@@ -351,6 +353,7 @@ add a b =
         (MagnitudePair pairs) =
             sameSizeNotNormalized ma mb
 
+        added : List Int
         added =
             List.map (\( a_, b_ ) -> a_ + b_) pairs
     in
@@ -427,12 +430,14 @@ mulMagnitudes (Magnitude mag1) (Magnitude mag2) =
 
         m :: mx ->
             let
+                accum : Magnitude
                 accum =
                     mulSingleDigit (Magnitude mag2) m
 
                 (Magnitude rest) =
                     mulMagnitudes (Magnitude mx) (Magnitude mag2)
 
+                bigInt : BigInt
                 bigInt =
                     add
                         (mkBigInt Positive accum)
@@ -636,6 +641,7 @@ hexMagnitudeToString bigInt =
 
         Just ( d, r ) ->
             let
+                rString : String
                 rString =
                     Hex.toString (bigIntToInt_ r)
             in
@@ -655,9 +661,11 @@ div num den =
 
     else
         let
+            cand_l : Int
             cand_l =
                 List.length (toDigits num) - List.length (toDigits den) + 1
 
+            d : BigInt
             d =
                 div_
                     (Basics.max 0 cand_l)
@@ -677,6 +685,7 @@ div_ n num den =
             ( cdiv, cmod ) =
                 divmodDigit (padDigits n) num den
 
+            rdiv : BigInt
             rdiv =
                 div_ (n - 1) cmod den
         in
@@ -695,9 +704,11 @@ divDigit_ to_test padding num den =
 
     else
         let
+            x : BigInt
             x =
                 fromInt to_test
 
+            candidate : BigInt
             candidate =
                 mul (mul x den) padding
 
@@ -708,6 +719,7 @@ divDigit_ to_test padding num den =
                 else
                     ( zero, num )
 
+            restdiv : BigInt
             restdiv =
                 divDigit_ (to_test // 2) padding newmod den
         in
@@ -736,6 +748,7 @@ modBy den num =
 
                     Pos (Magnitude numList) ->
                         let
+                            m : Int
                             m =
                                 List.foldr
                                     (\d acc -> Basics.modBy shortDen (acc * baseDigit + d))
@@ -746,6 +759,7 @@ modBy den num =
 
                     Neg (Magnitude numList) ->
                         let
+                            m : Int
                             m =
                                 List.foldr
                                     (\d acc -> Basics.modBy shortDen (acc * baseDigit - d))
@@ -760,9 +774,11 @@ modBy den num =
 
             denList ->
                 let
+                    cand_l : Int
                     cand_l =
                         List.length (toDigits num) - List.length denList + 1
 
+                    m : BigInt
                     m =
                         mod_
                             (Basics.max 0 cand_l)
@@ -780,6 +796,7 @@ mod_ n num den =
 
     else
         let
+            cmod : BigInt
             cmod =
                 modDigit (padDigits n) num den
         in
@@ -798,12 +815,15 @@ modDigit_ to_test padding num den =
 
     else
         let
+            x : BigInt
             x =
                 fromInt to_test
 
+            candidate : BigInt
             candidate =
                 mul (mul x den) padding
 
+            newMod : BigInt
             newMod =
                 if lte candidate num then
                     sub num candidate
@@ -826,6 +846,7 @@ square num =
 isEven : BigInt -> Bool
 isEven num =
     let
+        even : Int -> Bool
         even i =
             Basics.modBy 2 i == 0
     in
@@ -885,6 +906,7 @@ divmod num den =
 
     else
         let
+            cand_l : Int
             cand_l =
                 List.length (toDigits num) - List.length (toDigits den) + 1
 
@@ -912,9 +934,11 @@ divmodDigit_ to_test padding num den =
 
     else
         let
+            x : BigInt
             x =
                 fromInt to_test
 
+            candidate : BigInt
             candidate =
                 mul (mul x den) padding
 
@@ -1102,6 +1126,8 @@ sameSizeRaw xs ys =
             ( x, y ) :: sameSizeRaw xs_ ys_
 
 
+{-| Compute the Greatest Common Divisors of two numbers.
+-}
 gcd : BigInt -> BigInt -> BigInt
 gcd x y =
     let
