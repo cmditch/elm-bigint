@@ -577,8 +577,8 @@ toString bigInt =
 
 
 fillZeroes : Int -> String
-fillZeroes =
-    String.padLeft maxDigitMagnitude '0' << String.fromInt
+fillZeroes x =
+    String.padLeft maxDigitMagnitude '0' (String.fromInt x)
 
 
 revMagnitudeToString : Magnitude -> String
