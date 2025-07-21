@@ -12,7 +12,8 @@ import Test exposing (..)
 integer : Fuzzer BigInt
 integer =
     Fuzz.oneOf
-        [ Fuzz.map fromInt int
+        [ Fuzz.map fromInt (Fuzz.oneOfValues [ 0, 1, -1, 2, -2 ])
+        , Fuzz.map fromInt int
         , Fuzz.filterMap BigInt.fromIntString intString
         ]
 
