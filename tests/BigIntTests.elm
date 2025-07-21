@@ -1,4 +1,4 @@
-module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, modTests, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
+module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, modTests, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
 
 import BigInt exposing (..)
 import Constants exposing (maxDigitValue)
@@ -357,6 +357,7 @@ modTests =
         ]
 
 
+gcdTests : Test
 gcdTests =
     describe "gcd"
         [ fuzz2 integer integer "definition" <|
