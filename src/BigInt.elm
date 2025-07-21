@@ -721,8 +721,64 @@ the second argument is negative, unlike Basics.modBy.
 
 -}
 modBy : BigInt -> BigInt -> Maybe BigInt
-modBy modulus x =
-    divmod x modulus |> Maybe.map Tuple.second
+modBy den num =
+    if den == zero then
+        Nothing
+
+    else
+        let
+            cand_l =
+                List.length (toDigits num) - List.length (toDigits den) + 1
+
+            m =
+                mod_
+                    (Basics.max 0 cand_l)
+                    (abs num)
+                    (abs den)
+        in
+        Just
+            (mkBigInt (sign num) (magnitude m))
+
+
+mod_ : Int -> BigInt -> BigInt -> BigInt
+mod_ n num den =
+    if n == 0 then
+        modDigit (padDigits n) num den
+
+    else
+        let
+            cmod =
+                modDigit (padDigits n) num den
+        in
+        mod_ (n - 1) cmod den
+
+
+modDigit : BigInt -> BigInt -> BigInt -> BigInt
+modDigit padding x y =
+    modDigit_ (2 ^ maxDigitBits) padding x y
+
+
+modDigit_ : Int -> BigInt -> BigInt -> BigInt -> BigInt
+modDigit_ to_test padding num den =
+    if to_test == 0 then
+        num
+
+    else
+        let
+            x =
+                fromInt to_test
+
+            candidate =
+                mul (mul x den) padding
+
+            newMod =
+                if lte candidate num then
+                    sub num candidate
+
+                else
+                    num
+        in
+        modDigit_ (to_test // 2) padding newMod den
 
 
 {-| Square.
