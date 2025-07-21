@@ -233,14 +233,14 @@ fromHexString x =
 
         '-' :: '0' :: 'x' :: xs ->
             fromHexString_ xs
-                |> Maybe.map (mul (fromInt -1))
+                |> Maybe.map negate
 
         '-' :: [] ->
             Nothing
 
         '-' :: xs ->
             fromHexString_ xs
-                |> Maybe.map (mul (fromInt -1))
+                |> Maybe.map negate
 
         '+' :: [] ->
             Nothing
