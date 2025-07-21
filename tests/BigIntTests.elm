@@ -12,7 +12,8 @@ import Test exposing (..)
 integer : Fuzzer BigInt
 integer =
     Fuzz.oneOf
-        [ Fuzz.map fromInt int
+        [ Fuzz.map fromInt (Fuzz.oneOfValues [ 0, 1, -1, 2, -2 ])
+        , Fuzz.map fromInt int
         , Fuzz.filterMap BigInt.fromIntString intString
         ]
 
@@ -320,7 +321,24 @@ divmodTests =
 modTests : Test
 modTests =
     describe "modBy"
-        [ fuzz2 integer nonZeroInteger "definition" <|
+        [ fuzz2 (Fuzz.constant (BigInt.fromInt -1)) (Fuzz.constant (BigInt.fromInt 1)) "definition [examples]" <|
+            \x y ->
+                case BigInt.modBy y x of
+                    Nothing ->
+                        y
+                            |> Expect.equal (fromInt 0)
+
+                    Just r ->
+                        let
+                            c : BigInt
+                            c =
+                                BigInt.div x y
+                                    |> Debug.log "c"
+                        in
+                        mul c y
+                            |> add (Debug.log "r" r)
+                            |> Expect.equal x
+        , fuzz2 integer nonZeroInteger "definition" <|
             \x y ->
                 case BigInt.modBy y x of
                     Nothing ->
@@ -336,6 +354,19 @@ modTests =
                         mul c y
                             |> add r
                             |> Expect.equal x
+        ]
+
+
+gcdTests =
+    describe "gcd"
+        [ fuzz2 integer integer "definition" <|
+            \x y ->
+                let
+                    g =
+                        BigInt.gcd x y
+                in
+                ( BigInt.modBy g x, BigInt.modBy g y )
+                    |> Expect.equal ( Just zero, Just zero )
         ]
 
 
