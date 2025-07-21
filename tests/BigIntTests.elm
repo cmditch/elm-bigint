@@ -1,12 +1,12 @@
-module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, integer, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, minusOne, modTests, mulTests, negateTests, nonZeroInteger, one, powTests, roundRobinTests, singleNonZeroInteger, smallInt, smallPositiveIntegers, stringTests, subTests, tinyInt, tinyPositiveInt, zero)
+module BigIntTests exposing (absTests, addTests, compareTests, divmodTests, fromTests, gcdTests, isEvenTests, isOddTests, leadingZeroesTest, maxTests, minTests, modTests, mulTests, negateTests, powTests, roundRobinTests, stringTests, subTests)
 
-import BigInt exposing (..)
+import BigInt exposing (BigInt, add, divmod, fromHexString, fromInt, fromIntString, gt, gte, isEven, isOdd, lt, lte, mul, pow, sub, toHexString)
 import Constants exposing (maxDigitValue)
 import Expect
 import Fuzz exposing (Fuzzer, int, intRange)
 import Hex
 import Random
-import Test exposing (..)
+import Test exposing (Test, describe, fuzz, fuzz2, test)
 
 
 integer : Fuzzer BigInt
@@ -71,11 +71,6 @@ one =
     fromInt 1
 
 
-minusOne : BigInt
-minusOne =
-    fromInt -1
-
-
 smallInt : Fuzzer Int
 smallInt =
     intRange (Basics.negate maxDigitValue) maxDigitValue
@@ -125,9 +120,11 @@ fromTests =
         [ test "fromString 9999999 = fromInt 9999999" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "9999999"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 9999999
                 in
@@ -135,9 +132,11 @@ fromTests =
         , test "fromString 10000000 = fromInt 10000000" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "10000000"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 10000000
                 in
@@ -145,9 +144,11 @@ fromTests =
         , test "fromString 10000001 = fromInt 10000001" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromIntString "10000001"
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.fromInt 10000001
                 in
@@ -155,12 +156,15 @@ fromTests =
         , test "fromHexString 0x2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromHexString "0x2386f26fc10000"
 
+                    midLargeInt : BigInt
                     midLargeInt =
                         BigInt.fromInt 100000000
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
@@ -168,12 +172,15 @@ fromTests =
         , test "fromHexString 2386f26fc10000 = mul (fromInt 100000000) (fromInt 100000000)" <|
             \_ ->
                 let
+                    fromString : Maybe BigInt
                     fromString =
                         BigInt.fromHexString "2386f26fc10000"
 
+                    midLargeInt : BigInt
                     midLargeInt =
                         BigInt.fromInt 100000000
 
+                    fromInt : BigInt
                     fromInt =
                         BigInt.mul midLargeInt midLargeInt
                 in
@@ -208,11 +215,12 @@ fromTests =
 roundRobinTests : Test
 roundRobinTests =
     let
+        complexRoundRobin : Int -> Maybe BigInt
         complexRoundRobin int_ =
             fromInt int_
                 |> toHexString
                 |> fromHexString
-                |> Maybe.andThen (toString >> fromIntString)
+                |> Maybe.andThen (BigInt.toString >> fromIntString)
     in
     describe "complex round robin: fromInt -> toHexString -> fromHexString -> toString -> fromString"
         [ fuzz maxIntRange "large int range" <|
@@ -249,6 +257,7 @@ negateTests =
         [ fuzz int "negate x = -x; x >= 0" <|
             \x ->
                 let
+                    y : Int
                     y =
                         Basics.abs x
                 in
@@ -258,6 +267,7 @@ negateTests =
         , fuzz int "negate (-x) = x; x >= 0" <|
             \x ->
                 let
+                    y : Int
                     y =
                         Basics.abs x * -1
                 in
@@ -287,7 +297,7 @@ subTests =
 mulTests : Test
 mulTests =
     describe "Mul testsuite"
-        [ fuzz2 smallInt smallInt "mult x y = x * y for small numbers" <|
+        [ fuzz2 smallInt smallInt "mul x y = x * y for small numbers" <|
             \x y ->
                 mul (fromInt x) (fromInt y)
                     |> Expect.equal (fromInt (x * y))
@@ -333,10 +343,9 @@ modTests =
                             c : BigInt
                             c =
                                 BigInt.div x y
-                                    |> Debug.log "c"
                         in
                         mul c y
-                            |> add (Debug.log "r" r)
+                            |> add r
                             |> Expect.equal x
         , fuzz2 integer nonZeroInteger "definition" <|
             \x y ->
@@ -363,6 +372,7 @@ gcdTests =
         [ fuzz2 integer integer "definition" <|
             \x y ->
                 let
+                    g : BigInt
                     g =
                         BigInt.gcd x y
                 in
@@ -398,6 +408,7 @@ stringTests =
         , fuzz integer "accept '+' at the beginning of the string" <|
             \x ->
                 let
+                    y : String
                     y =
                         x
                             |> BigInt.abs
@@ -409,6 +420,7 @@ stringTests =
         , test "Basic toHexString" <|
             \_ ->
                 let
+                    fromBase16String : Maybe BigInt
                     fromBase16String =
                         BigInt.fromHexString "2386f26fc10000"
 
