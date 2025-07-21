@@ -1118,8 +1118,8 @@ normaliseDigit x =
 
 
 dropZeroes : List Int -> List Int
-dropZeroes =
-    List.Extra.dropWhileRight ((==) 0)
+dropZeroes ls =
+    List.Extra.dropWhileRight ((==) 0) ls
 
 
 isNegativeMagnitude : List Int -> Bool
