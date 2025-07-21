@@ -551,8 +551,19 @@ isOddTests =
 powTests : Test
 powTests =
     describe "exponentiation (pow)"
-        [ fuzz2 tinyInt tinyPositiveInt "pow x y = y ^ x for small numbers" <|
+        [ fuzz integer "pow x 0 = 1" <|
+            \base ->
+                pow base (fromInt 0)
+                    |> Expect.equal (fromInt 1)
+        , fuzz2 integer tinyPositiveInt "pow x (n + 1) = pow x n * x" <|
             \base exp ->
-                BigInt.toString (pow (fromInt base) (fromInt exp))
-                    |> Expect.equal (BigInt.toString (fromInt (base ^ exp)))
+                pow base (fromInt (exp + 1))
+                    |> Expect.equal
+                        (pow base (fromInt exp)
+                            |> mul base
+                        )
+        , fuzz2 tinyInt tinyPositiveInt "pow x y = x ^ y for small numbers" <|
+            \base exp ->
+                pow (fromInt base) (fromInt exp)
+                    |> Expect.equal (fromInt (base ^ exp))
         ]

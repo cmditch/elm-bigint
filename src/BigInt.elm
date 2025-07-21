@@ -901,10 +901,43 @@ powHelp work num exp =
                 mul work num
 
             else if isEven exp then
-                powHelp work (square num) (div exp two)
+                powHelp work (square num) (divByTwo exp)
 
             else
-                powHelp (mul num work) (square num) (div (sub exp one) two)
+                powHelp (mul num work) (square num) (divByTwo (sub exp one))
+
+
+divByTwo : BigInt -> BigInt
+divByTwo q =
+    case q of
+        Zer ->
+            q
+
+        Neg mag ->
+            Neg (divMagnitudeByTwo mag)
+
+        Pos mag ->
+            Pos (divMagnitudeByTwo mag)
+
+
+divMagnitudeByTwo : Magnitude -> Magnitude
+divMagnitudeByTwo (Magnitude m) =
+    List.foldr
+        (\d ( carry, acc ) ->
+            ( Basics.modBy 2 d == 1
+            , (if carry then
+                (d + baseDigit) // 2
+
+               else
+                d // 2
+              )
+                :: acc
+            )
+        )
+        ( False, [] )
+        m
+        |> Tuple.second
+        |> Magnitude
 
 
 {-| Division and modulus
@@ -1020,11 +1053,6 @@ zero =
 one : BigInt
 one =
     fromInt 1
-
-
-two : BigInt
-two =
-    fromInt 2
 
 
 {-| We can perform operations more quickly if we don't worry about keeping things in final compressed form.
